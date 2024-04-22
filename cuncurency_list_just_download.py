@@ -11,6 +11,8 @@ headers = {
     'accept': '*/*'
 }
 
+SEG = "seg_full"
+
 
 def get_m3u8_list(url):
     req = requests.get(url=url, headers=headers)
@@ -31,13 +33,13 @@ def get_m3u8_list(url):
 
 
 def get_link_from_m3u8(url_m3u8):
-    if not os.path.isdir('seg'):
-        os.mkdir('seg')
+    if not os.path.isdir(SEG):
+        os.mkdir(SEG)
     req = requests.get(url=url_m3u8, headers=headers)
     data_m3u8_dict = []
-    with open('seg\\pl_list.txt', 'w', encoding='utf-8') as file:
+    with open(f"{SEG}\\pl_list.txt", 'w', encoding='utf-8') as file:
         file.write(req.text)
-    with open('seg\\pl_list.txt', 'r', encoding='utf-8') as file:
+    with open(f"{SEG}\\pl_list.txt", 'r', encoding='utf-8') as file:
         src = file.readlines()
 
     for item in src:
@@ -62,14 +64,14 @@ def get_download_link(m3u8_link):
 
 
 def get_download_segment(link, count):
-    if not os.path.isdir('seg'):
-        os.mkdir('seg')
+    if not os.path.isdir(SEG):
+        os.mkdir(SEG)
 
     # Функция для загрузки одного сегмента
     def download_segment(item):
         print(f'[+] - Загружаю сегмент {item}/{count}')
         req = requests.get(f'{link}segment-{item}-v1-a1.ts')
-        with open(f'seg\\segment-{item}-v1-a1.ts', 'wb') as file:
+        with open(f"{SEG}\\segment-{item}-v1-a1.ts", 'wb') as file:
             file.write(req.content)
 
     # Создаем ThreadPoolExecutor с максимальным количеством потоков 20
@@ -81,19 +83,21 @@ def get_download_segment(link, count):
 
 
 def merge_ts(author, title, count):
-    if not os.path.isdir(author):
-        os.mkdir(author)
-    with open(f'seg\\{title}.ts', 'wb') as merged:
+    save_dir = f"full\\{author}"
+    os.mkdir("full")
+    if not os.path.isdir(save_dir):
+        os.mkdir(save_dir)
+    with open(f"{SEG}\\{title}.ts", 'wb') as merged:
         for ts in range(1, count + 1):
-            with open(f'seg\\segment-{ts}-v1-a1.ts', 'rb') as mergefile:
+            with open(f"{SEG}\\segment-{ts}-v1-a1.ts", 'rb') as mergefile:
                 shutil.copyfileobj(mergefile, merged)
-    os.system(f"ffmpeg -i seg\\{title}.ts -c:v hevc_nvenc -b:v 1M -preset p7 -c:a copy {author}\\{title}.mp4")
+    os.system(f"ffmpeg -i {SEG}\\{title}.ts -c:v hevc_nvenc -b:v 1M -preset p7 -c:a copy {save_dir}\\{title}.mp4")
     print('[+] - Конвертирование завершено')
 
     file_dir = os.listdir('seg')
     for file in file_dir:
-        os.remove(f'seg\\{file}')
-    os.removedirs('seg')
+        os.remove(f"{SEG}\\{file}")
+    os.removedirs(SEG)
 
 
 def main():

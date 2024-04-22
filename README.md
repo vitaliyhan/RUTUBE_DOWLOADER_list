@@ -8,3 +8,4 @@
 #### [cuncurency_list.py](cuncurency_list.py) - download from list
 #### [cuncurent.py](cuncurent.py) - download concurrent
 #### [rt_downloader.py](rt_downloader.py) - default
+#### [cuncurency_list_just_download.py](cuncurency_list_just_download.py) - only download from list

@@ -1,4 +1,5 @@
 import os.path
+import re
 import shutil
 import concurrent.futures
 import requests
@@ -111,7 +112,8 @@ def main():
         try:
             m3u8_link = get_link_from_m3u8(m3u8_url[2])
             print(m3u8_link)
-            seg_count = int(get_segment_count(m3u8_link))
+            seg_count = int(re.search(r'\d+', get_segment_count(m3u8_link)).group())
+            # seg_count = int(get_segment_count(m3u8_link))
             print(seg_count)
             dwnl_link = get_download_link(m3u8_link)
             print(dwnl_link)

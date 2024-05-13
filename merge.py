@@ -5,10 +5,12 @@ import shutil
 def merge_ts(author, title, count):
     if not os.path.isdir(author):
         os.mkdir(author)
-    with open(f'seg1\\{title}.ts', 'wb') as merged:
+    if not os.path.isdir(f'{author}\\seg_full'):
+        os.mkdir(f'{author}\\seg_full')
+    with open(f'{author}\\seg_full\\{title}.ts', 'wb') as merged:
         for ts in range(1, count + 1):
-            with open(f'seg1\\segment-{ts}-v1-a1.ts', 'rb') as mergefile:
+            with open(f'seg_full\\segment-{ts}-v1-a1.ts', 'rb') as mergefile:
                 shutil.copyfileobj(mergefile, merged)
 
 
-merge_ts('test', 'first10', 10)
+merge_ts('test', '9 ser', 2077)

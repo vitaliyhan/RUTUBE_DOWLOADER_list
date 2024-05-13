@@ -64,6 +64,7 @@ def get_download_link(m3u8_link):
 
 
 def get_download_segment(link, count):
+    print('get_download_segment')
     if not os.path.isdir(SEG):
         os.mkdir(SEG)
 
@@ -78,21 +79,26 @@ def get_download_segment(link, count):
     with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
         # Запускаем загрузку сегментов в пуле потоков
         executor.map(download_segment, range(1, count + 1))
+        # num = 1631
+        # executor.map(download_segment, range(num - 1, num + 1))
+        # executor.map(download_segment, range(1, count + 1))
 
     print('[INFO] - Все сегменты загружены')
 
 
 def merge_ts(author, title, count):
+    print('merge_ts')
     save_dir = f"full\\{author}"
-    os.mkdir("full")
+    if not os.path.isdir("full"):
+        os.mkdir("full")
     if not os.path.isdir(save_dir):
         os.mkdir(save_dir)
     with open(f"{SEG}\\{title}.ts", 'wb') as merged:
         for ts in range(1, count + 1):
             with open(f"{SEG}\\segment-{ts}-v1-a1.ts", 'rb') as mergefile:
                 shutil.copyfileobj(mergefile, merged)
-    os.system(f"ffmpeg -i {SEG}\\{title}.ts -c:v hevc_nvenc -b:v 1M -preset p7 -c:a copy {save_dir}\\{title}.mp4")
-    print('[+] - Конвертирование завершено')
+    # os.system(f"ffmpeg -i {SEG}\\{title}.ts -c:v hevc_nvenc -b:v 1M -preset p7 -c:a copy {save_dir}\\{title}.mp4")
+    print('[+] - Объединение завершено')
 
     file_dir = os.listdir('seg')
     for file in file_dir:
@@ -126,6 +132,8 @@ def main():
                 os.mkdir('seg')
             # Загрузка сегментов асинхронно
             get_download_segment(dwnl_link, seg_count)
+            # При догрузке
+            # exit()
             # После завершения всех задач загрузки, запускаем объединение сегментов в один файл
             merge_ts(m3u8_url[0], m3u8_url[1], seg_count)
             link_end_time = time.time()  # конечное время выполнения для каждого URL

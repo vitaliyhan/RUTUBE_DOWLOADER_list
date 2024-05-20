@@ -4,6 +4,7 @@ import shutil
 import concurrent.futures
 import requests
 import time
+import sys
 
 headers = {
     'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) '
@@ -12,6 +13,7 @@ headers = {
 }
 
 SEG = "seg_full"
+ARG = False
 
 
 def get_m3u8_list(url):
@@ -78,8 +80,13 @@ def get_download_segment(link, count):
     # Создаем ThreadPoolExecutor с максимальным количеством потоков 20
     with concurrent.futures.ThreadPoolExecutor(max_workers=20) as executor:
         # Запускаем загрузку сегментов в пуле потоков
-        executor.map(download_segment, range(1, count + 1))
-        # num = 1631
+        if ARG:
+            num = ARG
+            executor.map(download_segment, range(num, num + 1))
+        else:
+            executor.map(download_segment, range(1, count + 1))
+        # executor.map(download_segment, range(1, count + 1))
+        # num = 2108
         # executor.map(download_segment, range(num - 1, num + 1))
         # executor.map(download_segment, range(1, count + 1))
 
@@ -133,7 +140,8 @@ def main():
             # Загрузка сегментов асинхронно
             get_download_segment(dwnl_link, seg_count)
             # При догрузке
-            # exit()
+            if ARG:
+                exit()
             # После завершения всех задач загрузки, запускаем объединение сегментов в один файл
             merge_ts(m3u8_url[0], m3u8_url[1], seg_count)
             link_end_time = time.time()  # конечное время выполнения для каждого URL
@@ -153,4 +161,15 @@ def main():
 
 
 if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        try:
+            # Try to convert the argument to an integer
+            ARG = int(sys.argv[1])
+        except ValueError:
+            print("Argument must be an integer")
+            sys.exit(1)  # Exit the script with an error status
+    else:
+        # No argument provided, CONFIG_VALUE remains False
+        ARG = False
+    print("ARG", ARG)
     main()

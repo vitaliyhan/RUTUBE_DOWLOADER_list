@@ -13,4 +13,4 @@ def merge_ts(author, title, count):
                 shutil.copyfileobj(mergefile, merged)
 
 
-merge_ts('test', '9 ser', 2077)
+merge_ts('test', '10 ser', 2205)
